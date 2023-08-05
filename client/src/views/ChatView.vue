@@ -33,6 +33,7 @@ const PromptGPT = () => {
     disabled.value = true;
     firstLoad.value = false;
     let message: object = {
+      //system, user, assistant, function
       role: "user",
       content: prompt.value
     };
@@ -54,7 +55,6 @@ const PromptGPT = () => {
 const addMsg = (msg: object) => {
   messages.value.push(msg);
   window.localStorage.setItem("openai-chat", JSON.stringify(messages.value));
-  scrollToBottom();
 };
 const scrollToBottom = () => {
   var objDiv = chatDisplay.value;
@@ -66,7 +66,6 @@ const clearHistory = () => {
 };
 onMounted(() => {
   messages.value = JSON.parse(window.localStorage.getItem("openai-chat") || '[]');
-  scrollToBottom();
 });
 </script>
 <style scoped>
@@ -103,7 +102,6 @@ onMounted(() => {
 }
 
 .user-input {
-  border: 1px solid red;
   text-align: center;
   position: absolute;
   left: 0px;

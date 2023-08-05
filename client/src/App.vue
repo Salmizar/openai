@@ -1,9 +1,9 @@
 <template>
-  <ChatNavigator />
+  <ProjectNavigator />
   <router-view/>
 </template>
 <script lang="ts" setup>
-import ChatNavigator from '@/components/ChatNavigator.vue'; // @ is an alias to /src
+import ProjectNavigator from '@/components/ProjectNavigator.vue'; // @ is an alias to /src
 </script>
 <style>
 #app {
