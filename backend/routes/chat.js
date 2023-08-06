@@ -5,14 +5,17 @@ const configuration = new Configuration({
     apiKey: process.env.OPENAI_API_KEY,
 });
 const openai = new OpenAIApi(configuration);
+const model = "gpt-3.5-turbo";
+const temperature  = 0.8;
 
 router.post('/', async (req,res) => {
     try {
         const response = await openai.createChatCompletion({
             //https://platform.openai.com/docs/models
-            "model": "gpt-3.5-turbo",
-            "messages": [{"role": "user", "content": req.body.message}],
-            "temperature": 0
+            "model": model,
+            //"messages": [{"role": "user", "content": req.body.message}],
+            "messages": [JSON.parse(req.body.message)],
+            "temperature": temperature
         })
         return res.status(200).json({
             success: true,

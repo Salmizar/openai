@@ -1,34 +1,39 @@
 <template>
   <div class="chat">
-    <aside class="side-panel"><button v-on:click="clearHistory">Clear History</button></aside>
+    <aside class="side-panel">
+      <button v-on:click="clearHistory">Clear History</button>
+      <p>Select a File</p>
+    </aside>
     <main class="main-chat">
       <section ref="chatDisplay" class="chat-display">
-        <Message v-for="(message, index) in messages" :index="index" :firstLoad="firstLoad" :isLast="index + 1 === messages.length"
-          :message="message" :key="index" v-on:scrollToBottom="scrollToBottom" />
+        <Message v-for="(message, index) in messages" :index="index" :firstLoad="firstLoad"
+          :isLast="index + 1 === messages.length" :message="message" :key="index" v-on:scrollToBottom="scrollToBottom" />
       </section>
       <footer class="user-input">
         <textarea :readonly="disabled" rows="1" v-model="prompt" v-on:keyup.enter="UserInputTextArea" name="prompt"
           type="text" placeholder="Ask a question"></textarea>
-        <button :disabled="disabled" type="submit" v-on:click="PromptGPT">Submit</button>
+        <button :disabled="disabled" type="submit" v-on:click="askGPT">Submit</button>
       </footer>
     </main>
   </div>
 </template>
 <script lang="ts" setup>
-import Message from '@/components/MessageView.vue'; // @ is an alias to /src
 import { onMounted, ref } from "vue";
-import axios from "axios";
+import Message from '@/components/MessageView.vue'; // @ is an alias to /src
+import { promptGPT } from '@/chatGPT/chat';
+import * as chatHistory from '@/chatGPT/chatHistory';
+import * as files from '@/chatGPT/files';
 const prompt = ref<string>('');
 const disabled = ref<boolean>(false);
 const firstLoad = ref<boolean>(true);
 const chatDisplay = ref();
 const messages = ref<any>([]);
-const UserInputTextArea = (e: any) => {
+const UserInputTextArea = (e: KeyboardEvent) => {
   if (!e.shiftKey) {
-    PromptGPT();
+    askGPT();
   }
 };
-const PromptGPT = () => {
+const askGPT = () => {
   if (!disabled.value && prompt.value != '') {
     disabled.value = true;
     firstLoad.value = false;
@@ -38,53 +43,59 @@ const PromptGPT = () => {
       content: prompt.value
     };
     addMsg(message);
-    axios.post(process.env.VUE_APP_API_URL + "/chat/", { message: prompt.value }, { withCredentials: true })
-      .then((response) => {
-        if (response.status === 200) {
-          disabled.value = false;
-          addMsg(response.data.data);
-        }
-      })
-      .catch(error => {
+    promptGPT(message).then((data: object) => {
+      disabled.value = false;
+      addMsg(data);
+    })
+      .catch((error: any) => {
         disabled.value = false;
         console.log('error', error);
+
       });
     prompt.value = '';
   }
 };
 const addMsg = (msg: object) => {
   messages.value.push(msg);
-  window.localStorage.setItem("openai-readfile", JSON.stringify(messages.value));
+  chatHistory.set(messages.value);
 };
 const scrollToBottom = () => {
   var objDiv = chatDisplay.value;
   objDiv.scrollTop = objDiv.scrollHeight;
 };
 const clearHistory = () => {
-  window.localStorage.removeItem('openai-readfile');
+  chatHistory.clear();
   messages.value = [];
 };
 onMounted(() => {
-  messages.value = JSON.parse(window.localStorage.getItem("openai-readfile") || '[]');
+  chatHistory.updateName('openai-readfile');
+
+  files.getFileList().then((data: object) => {
+    console.log('files response',data);
+  })
+
+  messages.value = chatHistory.get();
 });
 </script>
 <style scoped>
 .chat {
   height: calc(100vh - 40px);
 }
+
 .side-panel {
   float: left;
-  width: 15%;
+  width: 25%;
   height: 100%;
   text-align: center;
 }
+
 .side-panel button {
-  margin-top:25px;
+  margin-top: 25px;
 }
 
 .main-chat {
   float: right;
-  width: 85%;
+  width: 75%;
   height: 100%;
   position: relative;
 }
@@ -115,7 +126,7 @@ onMounted(() => {
 .user-input textarea {
   width: 70%;
   max-width: 500px;
-  margin-right:10px;
+  margin-right: 10px;
 }
 
 .user-input button {
