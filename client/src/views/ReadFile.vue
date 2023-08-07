@@ -1,8 +1,14 @@
 <template>
   <div class="chat">
     <aside class="side-panel">
-      <button v-on:click="clearHistory">Clear History</button>
-      <p>Select a File</p>
+      <button class="clear-history" v-on:click="clearHistory">Clear History</button>
+      <p>Files to interact with</p>
+      Add file: <input v-on:change="addFile" class="add-file" type="file" ref="fileToAdd" />
+      <div class="file" v-bind:class="{ 'file-selected': index === selectedFile }"
+        v-for="(file, index) in fileList" v-on:click="selectFile(index)" :key="index">
+        {{ file.name }}
+        <svg-icon v-if="index===selectedFile" v-on:click="deleteFile(file.fileName)" type="mdi" :path="deleteIconPath" size="15"></svg-icon>
+      </div>
     </aside>
     <main class="main-chat">
       <section ref="chatDisplay" class="chat-display">
@@ -19,15 +25,21 @@
 </template>
 <script lang="ts" setup>
 import { onMounted, ref } from "vue";
+import SvgIcon from '@jamescoyle/vue-icon';
+import { mdiClose } from '@mdi/js';
 import Message from '@/components/MessageView.vue'; // @ is an alias to /src
 import { promptGPT } from '@/chatGPT/chat';
 import * as chatHistory from '@/chatGPT/chatHistory';
-import * as files from '@/chatGPT/files';
+import * as savedFiles from '@/chatGPT/savedFiles';
+const deleteIconPath = mdiClose;
 const prompt = ref<string>('');
+const fileToAdd = ref();
 const disabled = ref<boolean>(false);
 const firstLoad = ref<boolean>(true);
 const chatDisplay = ref();
 const messages = ref<any>([]);
+const fileList = ref<any>([]);
+const selectedFile = ref<number>(-1);
 const UserInputTextArea = (e: KeyboardEvent) => {
   if (!e.shiftKey) {
     askGPT();
@@ -67,19 +79,39 @@ const clearHistory = () => {
   chatHistory.clear();
   messages.value = [];
 };
+const getSavedFiles = () => {
+  fileList.value = [];
+  savedFiles.getFileList().then((data: []) => {
+    data.map((file: any) => {
+      fileList.value.push(file);
+    })
+  })
+};
+const deleteFile = (file:object) => {
+  savedFiles.deleteFile(file).then(() => {
+    selectedFile.value = -1;
+    getSavedFiles();
+  })
+};
+const addFile = (e:any) => {
+  savedFiles.uploadFile(e.target.files[0]).then(() => {
+    fileToAdd.value = '';
+    getSavedFiles();
+  });
+};
+const selectFile = (index:number) => {
+selectedFile.value = index;
+};
 onMounted(() => {
   chatHistory.updateName('openai-readfile');
-
-  files.getFileList().then((data: object) => {
-    console.log('files response',data);
-  })
-
+  getSavedFiles();
   messages.value = chatHistory.get();
 });
 </script>
 <style scoped>
 .chat {
   height: calc(100vh - 40px);
+  font-size: 13px;
 }
 
 .side-panel {
@@ -88,9 +120,45 @@ onMounted(() => {
   height: 100%;
   text-align: center;
 }
+p {
+  padding: 5px;
+  background-color: #E5E5E5;
+}
+input {
+  width: 90px;
+  overflow: hidden;
+}
+.file {
+  text-align: left;
+  margin: 5px 10px 5px 10px;
+  border-radius: 5px;
+  padding: 5px;
+  border: 1px solid white;
+  cursor: pointer;
+}
+.file svg {
+  float: right;
+  cursor: pointer;
+}
+.file:hover {
+  border: 1px solid #d5d5d5;
+}
 
-.side-panel button {
+.file-selected {
+  border: 1px solid grey;
+  cursor: default;
+}
+
+.file-selected:hover {
+  border: 1px solid grey;
+}
+
+.side-panel .clear-history {
   margin-top: 25px;
+}
+
+.add-file {
+  margin-top: 0px;
 }
 
 .main-chat {
@@ -132,5 +200,4 @@ onMounted(() => {
 .user-input button {
   position: relative;
   top: -6px;
-}
-</style>
+}</style>
