@@ -1,6 +1,6 @@
 import axios from "axios";
 
-function getFileList():Promise<number> {
+function getFileList(): Promise<number> {
     return new Promise((resolve, reject) => {
         axios.get(process.env.VUE_APP_API_URL + "/files/",
             { withCredentials: true }
@@ -15,30 +15,27 @@ function getFileList():Promise<number> {
             });
     })
 }
-function uploadFile(file:any):Promise<number> {
+function uploadFile(file: any): Promise<number> {
     return new Promise((resolve, reject) => {
-        console.log('file',file);
         const formData = new FormData();
         formData.append("file", file);
-        axios.post(process.env.VUE_APP_API_URL + "/files/?fileName="+file.name, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
+        fetch(process.env.VUE_APP_API_URL + "/files/?fileName=" + file.name, {
+            method: 'POST',
+            body: formData
         })
-        .then((response) => {
-            if (response.status === 200) {
-                resolve(response.data);
-            }
-        })
-        .catch((error: any) => {
-            console.log('uploadFile');
-            reject(error);
-        });
+            .then((res) => {
+                if (res.status === 200) {
+                    resolve(res.status);
+                }
+            })
+            .catch((error) => {
+                reject(error);
+            });
     })
 }
-function deleteFile(fileName:string):Promise<number> {
+function deleteFile(fileName: string): Promise<number> {
     return new Promise((resolve, reject) => {
-        axios.delete(process.env.VUE_APP_API_URL + "/files/?fileName="+fileName,
+        axios.delete(process.env.VUE_APP_API_URL + "/files/?fileName=" + fileName,
             { withCredentials: true }
         )
             .then((response) => {

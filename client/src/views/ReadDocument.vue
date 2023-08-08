@@ -6,7 +6,7 @@
       Add file: <input accept=".txt,.pdf" v-on:change="addFile" class="add-file" type="file" ref="fileToAdd" />
       <div class="file" v-bind:class="{ 'file-selected': index === selectedFile }" v-for="(file, index) in fileList"
         v-on:click="selectFile(index)" :key="index">
-        {{ file.name }}
+        <span>{{ file.name }}</span>
         <svg-icon v-if="index === selectedFile" v-on:click="deleteFile(file.fileName)" type="mdi" :path="deleteIconPath"
           size="15"></svg-icon>
       </div>
@@ -152,7 +152,12 @@ input {
   cursor: pointer;
   position: relative;
 }
-
+.file span {
+  display: block;
+  overflow: hidden;
+  width: 100%;
+  white-space: nowrap;
+}
 .file svg {
   position: absolute;
   top: 5px;
@@ -168,7 +173,9 @@ input {
   border: 1px solid grey;
   cursor: default;
 }
-
+.file-selected span {
+  width: calc( 100% - 20px);
+}
 .file-selected:hover {
   border: 1px solid grey;
 }
