@@ -1,6 +1,7 @@
 <template>
     <div class="message" :class="[props.message.role]">
         <svg-icon v-if="isAssistant" type="mdi" :path="iconPath" size="15"></svg-icon>
+        <svg-icon v-if="fileSelected" type="mdi" :path="fileIconPath" size="15"></svg-icon>
         <div class="copy-icon" v-on:click="copyResponse">
             <svg-icon v-if="isAssistant" type="mdi" alt="Text" :path="copyIconPath" size="15"></svg-icon>
         </div>
@@ -9,7 +10,7 @@
 </template>
 <script lang="ts" setup>
 import SvgIcon from '@jamescoyle/vue-icon';
-import { mdiRobot, mdiContentCopy } from '@mdi/js';
+import { mdiRobot, mdiContentCopy, mdiFileDocumentOutline } from '@mdi/js';
 import { defineProps, defineEmits, onMounted, ref, onUpdated } from 'vue';
 const emits = defineEmits([
     'scrollToBottom'
@@ -24,8 +25,10 @@ const content = props.message.content.replace(/(?:\r\n|\r|\n)/g, '<br/>').split(
 let  wordCount = 0;
 const messageContent = ref<string>('');
 const isAssistant = (props.message.role === 'assistant');
+const fileSelected = (props.message.role === 'fileSelected');
 const iconPath = mdiRobot;
 const copyIconPath = mdiContentCopy;
+const fileIconPath = mdiFileDocumentOutline;
 const scrollToBottom = () => {
     if (props.isLast) {
         emits('scrollToBottom');
@@ -39,7 +42,9 @@ const typeOutText = () => {
     }
 };
 const copyResponse = () => {
-    navigator.clipboard.writeText(props.message.content);
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(props.message.content);
+    }
 };
 onUpdated(() => {
     scrollToBottom();

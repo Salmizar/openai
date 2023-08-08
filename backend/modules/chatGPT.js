@@ -6,6 +6,7 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 exports.chatGPT = (message) => {
+    console.log('chatGPT',message);
     return new Promise(async (resolve, reject) => {
         try {
             const response = await openai.createChatCompletion({

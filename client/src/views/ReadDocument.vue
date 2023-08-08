@@ -29,7 +29,7 @@ import { onMounted, ref } from "vue";
 import SvgIcon from '@jamescoyle/vue-icon';
 import { mdiClose } from '@mdi/js';
 import Message from '@/components/MessageView.vue'; // @ is an alias to /src
-import { docPromptGPT, promptGPT } from '@/chatGPT/chat';
+import { docPromptGPT } from '@/chatGPT/chat';
 import * as chatHistory from '@/chatGPT/chatHistory';
 import * as savedFiles from '@/chatGPT/savedFiles';
 const deleteIconPath = mdiClose;
@@ -113,6 +113,11 @@ const addFile = (e: any) => {
 };
 const selectFile = (index: number) => {
   selectedFile.value = index;
+  let message: object = {
+        role: "fileSelected",
+        content: '<b>File selected:</b> '+fileList.value[selectedFile.value].name
+      };
+      addMsg(message);
 };
 onMounted(() => {
   chatHistory.updateName('openai-readfile');
