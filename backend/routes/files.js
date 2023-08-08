@@ -2,21 +2,20 @@ const express = require('express');
 const router = express.Router();
 const fs = require('fs');
 const crypto = require('crypto');
-const savedFilesFolder = './savedFiles/';
+const savedFilesFolder = process.env.SAVED_FILES_FOLDER;
 router.get('/', (req, res) => {
     try {
         var fileNames = [];
         fs.readdir(savedFilesFolder, (err, files) => {
             files.forEach(file => {
                 fileNames.push({
-                "name": file.substring(0,file.indexOf('.',file.indexOf('.')+1)),
+                "name": file.substring(0,file.lastIndexOf('.')),
                 "fileName": file
             });
             });
             res.status(200).json(fileNames);
         });
     } catch (error) {
-        console.log('error ocurred');
         res.status(400).json({
             success: false,
             error: error.response ? error.response.data : "There was an issue on the server"
@@ -43,7 +42,6 @@ router.post('/', function (request, response) {
     }
 });
 router.delete('/', function (request, response) {
-    console.log('delete', request.query.fileName);
     fs.unlinkSync(savedFilesFolder+request.query.fileName);
     response.status(200).send();
 });

@@ -17,8 +17,9 @@ function getFileList():Promise<number> {
 }
 function uploadFile(file:any):Promise<number> {
     return new Promise((resolve, reject) => {
+        console.log('file',file);
         const formData = new FormData();
-        formData.append("file", file, file.name);
+        formData.append("file", file);
         axios.post(process.env.VUE_APP_API_URL + "/files/?fileName="+file.name, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'

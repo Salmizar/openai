@@ -7,9 +7,9 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import(/* webpackChunkName: "chat" */ '../views/ChatView.vue')
   },
   {
-    path: '/readfile',
-    name: 'ReadFile',
-    component: () => import(/* webpackChunkName: "readfile" */ '../views/ReadFile.vue')
+    path: '/readdocument',
+    name: 'ReadDocument',
+    component: () => import(/* webpackChunkName: "readfile" */ '../views/ReadDocument.vue')
   },
   {
     path: '/writecode',

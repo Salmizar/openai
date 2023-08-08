@@ -13,7 +13,7 @@ import { useRouter } from 'vue-router';
 const options = [
     { model: "", name: "Select One" },
     { model: "Chat", name: "Chat" },
-    { model: "ReadFile", name: "Read File" },
+    { model: "ReadDocument", name: "Read Document" },
     { model: "WriteCode", name: "Write Code" },
     { model: "Trivia", name: "Trivia Game" },
 ];

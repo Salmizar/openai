@@ -1,8 +1,19 @@
 const express = require('express');
 const router = express.Router();
 const { chatGPT } = require("../modules/chatGPT.js");
+const numberOfKeywordsToFind = 5;
+
 router.post('/', async (req, res) => {
-    chatGPT(JSON.parse(req.body.message)).then((data) => {
+    let message = {
+        "role": "user",
+        content: `provide ${numberOfKeywordsToFind} words, comma delimited list, used to search, based on this. Just the words.
+
+            '`+ JSON.parse(req.body.message).content+`'`
+    }
+    chatGPT(message).then((data) => {
+
+
+
         res.status(200).json(data);
     })
         .catch((error) => {

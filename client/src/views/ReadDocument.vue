@@ -3,11 +3,12 @@
     <aside class="side-panel">
       <button class="clear-history" v-on:click="clearHistory">Clear History</button>
       <p>Files to interact with</p>
-      Add file: <input v-on:change="addFile" class="add-file" type="file" ref="fileToAdd" />
-      <div class="file" v-bind:class="{ 'file-selected': index === selectedFile }"
-        v-for="(file, index) in fileList" v-on:click="selectFile(index)" :key="index">
+      Add file: <input accept=".txt,.pdf" v-on:change="addFile" class="add-file" type="file" ref="fileToAdd" />
+      <div class="file" v-bind:class="{ 'file-selected': index === selectedFile }" v-for="(file, index) in fileList"
+        v-on:click="selectFile(index)" :key="index">
         {{ file.name }}
-        <svg-icon v-if="index===selectedFile" v-on:click="deleteFile(file.fileName)" type="mdi" :path="deleteIconPath" size="15"></svg-icon>
+        <svg-icon v-if="index === selectedFile" v-on:click="deleteFile(file.fileName)" type="mdi" :path="deleteIconPath"
+          size="15"></svg-icon>
       </div>
     </aside>
     <main class="main-chat">
@@ -28,7 +29,7 @@ import { onMounted, ref } from "vue";
 import SvgIcon from '@jamescoyle/vue-icon';
 import { mdiClose } from '@mdi/js';
 import Message from '@/components/MessageView.vue'; // @ is an alias to /src
-import { promptGPT } from '@/chatGPT/chat';
+import { docPromptGPT, promptGPT } from '@/chatGPT/chat';
 import * as chatHistory from '@/chatGPT/chatHistory';
 import * as savedFiles from '@/chatGPT/savedFiles';
 const deleteIconPath = mdiClose;
@@ -46,25 +47,33 @@ const UserInputTextArea = (e: KeyboardEvent) => {
   }
 };
 const askGPT = () => {
-  if (!disabled.value && prompt.value != '') {
-    disabled.value = true;
-    firstLoad.value = false;
-    let message: object = {
-      //system, user, assistant, function
-      role: "user",
-      content: prompt.value
-    };
-    addMsg(message);
-    promptGPT(message).then((data: object) => {
-      disabled.value = false;
-      addMsg(data);
-    })
-      .catch((error: any) => {
+  if (!disabled.value) {
+    if (fileList.value.length === 0) {
+      alert('Please upload and then select a file before asking a question');
+    } else if (selectedFile.value === -1) {
+      alert('Please select a file in the left column before asking a question');
+    } else if (prompt.value === '') {
+      alert(`You didn't ask anything`);
+    } else {
+      disabled.value = true;
+      firstLoad.value = false;
+      let message: object = {
+        role: "user",
+        content: prompt.value,
+        document: fileList.value[selectedFile.value].fileName
+      };
+      addMsg(message);
+      docPromptGPT(message).then((data: object) => {
         disabled.value = false;
-        console.log('error', error);
+        addMsg(data);
+      })
+        .catch((error: any) => {
+          disabled.value = false;
+          console.log('error', error);
 
-      });
-    prompt.value = '';
+        });
+      prompt.value = '';
+    }
   }
 };
 const addMsg = (msg: object) => {
@@ -80,6 +89,7 @@ const clearHistory = () => {
   messages.value = [];
 };
 const getSavedFiles = () => {
+  selectedFile.value = -1;
   fileList.value = [];
   savedFiles.getFileList().then((data: []) => {
     data.map((file: any) => {
@@ -87,20 +97,22 @@ const getSavedFiles = () => {
     })
   })
 };
-const deleteFile = (file:object) => {
-  savedFiles.deleteFile(file).then(() => {
-    selectedFile.value = -1;
-    getSavedFiles();
-  })
+const deleteFile = (file: object) => {
+  if (confirm('Are you sure you want to delete the selected file?')) {
+    savedFiles.deleteFile(file).then(() => {
+      selectedFile.value = -1;
+      getSavedFiles();
+    })
+  }
 };
-const addFile = (e:any) => {
+const addFile = (e: any) => {
   savedFiles.uploadFile(e.target.files[0]).then(() => {
     fileToAdd.value = '';
     getSavedFiles();
   });
 };
-const selectFile = (index:number) => {
-selectedFile.value = index;
+const selectFile = (index: number) => {
+  selectedFile.value = index;
 };
 onMounted(() => {
   chatHistory.updateName('openai-readfile');
@@ -120,14 +132,17 @@ onMounted(() => {
   height: 100%;
   text-align: center;
 }
+
 p {
   padding: 5px;
   background-color: #E5E5E5;
 }
+
 input {
   width: 90px;
   overflow: hidden;
 }
+
 .file {
   text-align: left;
   margin: 5px 10px 5px 10px;
@@ -135,11 +150,16 @@ input {
   padding: 5px;
   border: 1px solid white;
   cursor: pointer;
+  position: relative;
 }
+
 .file svg {
-  float: right;
+  position: absolute;
+  top: 5px;
+  right: 5px;
   cursor: pointer;
 }
+
 .file:hover {
   border: 1px solid #d5d5d5;
 }
@@ -200,4 +220,5 @@ input {
 .user-input button {
   position: relative;
   top: -6px;
-}</style>
+}
+</style>
