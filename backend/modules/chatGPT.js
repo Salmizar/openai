@@ -13,7 +13,7 @@ exports.chatGPT = (message) => {
                 "model": process.env.OPENAI_MODEL,
                 //"messages": [{"role": "user", "content": req.body.message}],
                 "messages": [message],
-                "temperature": process.env.OPENAI_TEMPERATURE
+                "temperature": Number(process.env.OPENAI_TEMPERATURE)
             })
             resolve({
                 success: true,
