@@ -16,7 +16,7 @@ const emits = defineEmits([
     'scrollToBottom'
 ]);
 const props = defineProps<{
-    message: any,
+    message: object,
     index: number,
     isLast: boolean,
     firstLoad: boolean

@@ -6,9 +6,9 @@
       Add file: <input accept=".txt,.pdf" v-on:change="addFile" class="add-file" type="file" ref="fileToAdd" />
       <div class="file" v-bind:class="{ 'file-selected': index === selectedFile }" v-for="(file, index) in fileList"
         v-on:click="selectFile(index)" :key="index">
-        <span>{{ file.name }}</span>
-        <svg-icon v-if="index === selectedFile" v-on:click="deleteFile(file.fileName)" type="mdi" :path="deleteIconPath"
-          size="15"></svg-icon>
+        <span>{{ Object(file).name }}</span>
+        <svg-icon v-if="index === selectedFile" v-on:click="deleteFile(Object(file).fileName)" type="mdi"
+          :path="deleteIconPath" size="15"></svg-icon>
       </div>
     </aside>
     <main class="main-chat">
@@ -32,14 +32,15 @@ import Message from '@/components/MessageView.vue'; // @ is an alias to /src
 import { docPromptGPT } from '@/chatGPT/chat';
 import * as chatHistory from '@/chatGPT/chatHistory';
 import * as savedFiles from '@/chatGPT/savedFiles';
+import { IChatMSG, IChatMessages, IFiles, IFileList  } from '@/interfaces/interfaces'
 const deleteIconPath = mdiClose;
 const prompt = ref<string>('');
 const fileToAdd = ref();
 const disabled = ref<boolean>(false);
 const firstLoad = ref<boolean>(true);
 const chatDisplay = ref();
-const messages = ref<any>([]);
-const fileList = ref<any>([]);
+const messages = ref<IChatMessages>([]);
+const fileList = ref<IFileList>([]);
 const selectedFile = ref<number>(-1);
 const UserInputTextArea = (e: KeyboardEvent) => {
   if (!e.shiftKey) {
@@ -57,17 +58,17 @@ const askGPT = () => {
     } else {
       disabled.value = true;
       firstLoad.value = false;
-      let message: object = {
+      let message: IChatMSG = {
         role: "user",
         content: prompt.value,
-        document: fileList.value[selectedFile.value].fileName
+        document: Object(fileList.value[selectedFile.value]).fileName
       };
       addMsg(message);
-      docPromptGPT(message).then((data: object) => {
+      docPromptGPT(message).then((data: IChatMSG) => {
         disabled.value = false;
         addMsg(data);
       })
-        .catch((error: any) => {
+        .catch((error: object) => {
           disabled.value = false;
           console.log('error', error);
 
@@ -76,7 +77,7 @@ const askGPT = () => {
     }
   }
 };
-const addMsg = (msg: object) => {
+const addMsg = (msg: IChatMSG) => {
   messages.value.push(msg);
   chatHistory.set(messages.value);
 };
@@ -92,32 +93,35 @@ const getSavedFiles = () => {
   selectedFile.value = -1;
   fileList.value = [];
   savedFiles.getFileList().then((data: []) => {
-    data.map((file: any) => {
+    data.map((file: IFiles) => {
       fileList.value.push(file);
     })
   })
 };
-const deleteFile = (file: object) => {
+const deleteFile = (fileName: string) => {
   if (confirm('Are you sure you want to delete the selected file?')) {
-    savedFiles.deleteFile(file).then(() => {
+    savedFiles.deleteFile(fileName).then(() => {
       selectedFile.value = -1;
       getSavedFiles();
     })
   }
 };
-const addFile = (e: any) => {
-  savedFiles.uploadFile(e.target.files[0]).then(() => {
+const addFile = (e: Event) => {
+  const input = e.target as HTMLInputElement;
+  const file = input.files![0] as File;
+  savedFiles.uploadFile(file).then(() => {
     fileToAdd.value = '';
     getSavedFiles();
   });
 };
 const selectFile = (index: number) => {
   selectedFile.value = index;
-  let message: object = {
-        role: "fileSelected",
-        content: '<b>File selected:</b> '+fileList.value[selectedFile.value].name
-      };
-      addMsg(message);
+  let message: IChatMSG = {
+    role: "fileSelected",
+    content: '<b>File selected:</b> ' + Object(fileList.value[selectedFile.value]).name,
+    document: null
+  };
+  addMsg(message);
 };
 onMounted(() => {
   chatHistory.updateName('openai-readfile');
@@ -157,12 +161,14 @@ input {
   cursor: pointer;
   position: relative;
 }
+
 .file span {
   display: block;
   overflow: hidden;
   width: 100%;
   white-space: nowrap;
 }
+
 .file svg {
   position: absolute;
   top: 5px;
@@ -178,9 +184,11 @@ input {
   border: 1px solid grey;
   cursor: default;
 }
+
 .file-selected span {
-  width: calc( 100% - 20px);
+  width: calc(100% - 20px);
 }
+
 .file-selected:hover {
   border: 1px solid grey;
 }
@@ -232,5 +240,4 @@ input {
 .user-input button {
   position: relative;
   top: -6px;
-}
-</style>
+}</style>

@@ -14,10 +14,8 @@ router.post('/', async (req, res) => {
     //Ask ChatGPT to give up some keywords from the initial question
     chatGPT(message).then((data) => {
         let keywords = data.data.content.replace(/,/g, '').replace(/ /g, ', ').toLowerCase();
-        console.log('serching',keywords);
         //Find where those keywords are within the document and send just that part for ChatGPT to return the answer.
         searchDocument(JSON.parse(req.body.message).document, keywords).then((searchResults) => {
-            console.log('got search results',searchResults);
             let message = {
                 "role": "user",
                 content: `"""${searchResults.text}"""
@@ -28,13 +26,10 @@ router.post('/', async (req, res) => {
 
                 '${question}'`
             }
-            console.log('asking chatGPT',message);
             chatGPT(message).then((data) => {
-                console.log('got results from chatGPT');
                 res.status(200).json(data);
             })
                 .catch((error) => {
-                    console.log('unfortunately there was an error asking CatGPT for the answer');
                     res.status(400).json({
                         success: false,
                         error: error.response ? error.response.data : "There was an issue on the server"

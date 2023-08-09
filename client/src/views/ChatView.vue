@@ -19,12 +19,13 @@ import Message from '@/components/MessageView.vue'; // @ is an alias to /src
 import { onMounted, ref } from "vue";
 import { promptGPT } from '@/chatGPT/chat';
 import * as chatHistory from '@/chatGPT/chatHistory';
+import { IChatMSG, IChatMessages } from '@/interfaces/interfaces'
 const prompt = ref<string>('');
 const disabled = ref<boolean>(false);
 const firstLoad = ref<boolean>(true);
 const chatDisplay = ref();
-const messages = ref<any>([]);
-const UserInputTextArea = (e: any) => {
+const messages = ref<IChatMessages>([]);
+const UserInputTextArea = (e: KeyboardEvent) => {
   if (!e.shiftKey) {
     askGPT();
   }
@@ -33,17 +34,18 @@ const askGPT = () => {
   if (!disabled.value && prompt.value != '') {
     disabled.value = true;
     firstLoad.value = false;
-    let message: object = {
+    let message:IChatMSG = {
       //system, user, assistant, function
       role: "user",
-      content: prompt.value
+      content: prompt.value,
+      document: null
     };
     addMsg(message);
-    promptGPT(message).then((data: any) => {
+    promptGPT(message).then((data: IChatMSG) => {
       disabled.value = false;
       addMsg(data);
     })
-      .catch((error: any) => {
+      .catch((error: object) => {
         disabled.value = false;
         console.log('error', error);
 
@@ -51,7 +53,7 @@ const askGPT = () => {
     prompt.value = '';
   }
 };
-const addMsg = (msg: object) => {
+const addMsg = (msg: IChatMSG) => {
   messages.value.push(msg);
   chatHistory.set(messages.value);
 };

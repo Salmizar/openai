@@ -10,12 +10,12 @@ function getFileList(): Promise<number> {
                     resolve(response.data);
                 }
             })
-            .catch((error: any) => {
+            .catch((error: object) => {
                 reject(error);
             });
     })
 }
-function uploadFile(file: any): Promise<number> {
+function uploadFile(file: File): Promise<number> {
     return new Promise((resolve, reject) => {
         const formData = new FormData();
         formData.append("file", file);
@@ -43,7 +43,7 @@ function deleteFile(fileName: string): Promise<number> {
                     resolve(response.data);
                 }
             })
-            .catch((error: any) => {
+            .catch((error: object) => {
                 reject(error);
             });
     })

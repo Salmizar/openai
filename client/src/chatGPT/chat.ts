@@ -11,7 +11,7 @@ function promptGPT(message: object):Promise<number> {
                     resolve(response.data.data);
                 }
             })
-            .catch((error: any) => {
+            .catch((error: object) => {
                 reject(error);
             });
     })
@@ -28,7 +28,7 @@ function docPromptGPT(message: object):Promise<number> {
                     resolve(response.data.data);
                 }
             })
-            .catch((error: any) => {
+            .catch((error: object) => {
                 reject(error);
             });
     })

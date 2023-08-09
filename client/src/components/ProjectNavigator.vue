@@ -18,7 +18,7 @@ const options = [
     { model: "Trivia", name: "Trivia Game" },
 ];
 const router = useRouter();
-const LoadChatAction = (e: any) => {
+const LoadChatAction = (e: object) => {
     router.push({ name: e.currentTarget.value });
 }
 </script>
