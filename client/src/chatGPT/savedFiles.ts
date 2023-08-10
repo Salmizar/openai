@@ -1,6 +1,6 @@
 import axios from "axios";
 
-function getFileList(): Promise<number> {
+function getFileList(): Promise<object> {
     return new Promise((resolve, reject) => {
         axios.get(process.env.VUE_APP_API_URL + "/files/",
             { withCredentials: true }
@@ -23,9 +23,9 @@ function uploadFile(file: File): Promise<number> {
             method: 'POST',
             body: formData
         })
-            .then((res) => {
-                if (res.status === 200) {
-                    resolve(res.status);
+            .then((response) => {
+                if (response.status === 200) {
+                    resolve(response.status);
                 }
             })
             .catch((error) => {
@@ -40,7 +40,7 @@ function deleteFile(fileName: string): Promise<number> {
         )
             .then((response) => {
                 if (response.status === 200) {
-                    resolve(response.data);
+                    resolve(response.status);
                 }
             })
             .catch((error: object) => {

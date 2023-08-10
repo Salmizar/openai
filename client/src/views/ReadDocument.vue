@@ -144,6 +144,7 @@ onMounted(() => {
 
 p {
   padding: 5px;
+  margin: 20px 0 20px 0;
   background-color: #E5E5E5;
 }
 

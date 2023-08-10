@@ -1,31 +1,56 @@
 <template>
   <div class="trivia">
+    <br />
     <h2>Let's play trivia!</h2>
-    <h3>{{triviaTopic}}</h3>
-    <div v-on:click="selectTopic(topic)" class="trivia-topic" v-for="(topic, index) in topics" :topic="topic" :key="index">{{ topic }}</div>
+    <br />
+    <h3>{{ triviaInstructions }} <span v-if="currentRound > 0">- Round {{ currentRound }}!</span></h3>
+    <br />
+    <w-progress v-if="loading" class="ma1" circle></w-progress>
+    <div v-on:click="selectTopic(topic)" class="trivia-topic" v-for="(topic, index) in topics" :topic="topic"
+      :key="index">
+      {{ topic }}
+    </div>
+    <TriviaQuestion :currentRound="currentRound" :questions="questions" :triviaTopic="triviaTopic" />
   </div>
 </template>
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue';
-import { promptGPT } from '@/chatGPT/chat';
+import * as trivia from '@/chatGPT/trivia';
+import TriviaQuestion from '@/components/TriviaQuestion.vue'; // @ is an alias to /src
+import { IChatMSG } from '@/interfaces/interfaces';
 const topics = ref<[]>([]);
-const triviaTopic = ref<string>('Select a topic for the trivia game');
+const questions = ref<any>([]);
+const loading = ref<boolean>(true);
+const totalRounds = ref<number>(10);
+const currentRound = ref<number>(0);
+const triviaTopic = ref<string>('nothing');
+const triviaInstructions = ref<string>(`First, we'll generate some topic's you can choose from`);
 const getTriviaTopics = () => {
-  let message: object = {
-    //system, user, assistant, function
-    role: "user",
-    content: "Please suggest 5 topics for a trivia game. keep the descriptions short."
-  };
-  promptGPT(message).then((data: object) => {
-    
+  trivia.getTriviaTopics().then((data: IChatMSG) => {
+    loading.value = false;
+    triviaInstructions.value = `Select a topic for the trivia game`;
     topics.value = Object(data).content.split('\n');
-  }).catch((error: object) => {
-      console.log('error',error);
-    });
+  })
 };
-const selectTopic = (topic:string) => {
-  triviaTopic.value = topic.substring(topic.indexOf(".")+2, topic.indexOf(":"));
-}
+const getTriviaQuestions = () => {
+  loading.value = true;
+  trivia.getTriviaQuestions(triviaTopic.value, totalRounds.value).then((data: IChatMSG) => {
+    loading.value = false;
+    console.log('questions',data.content);
+    questions.value = data.content.split('. ');
+    nextRound();
+    console.log('data.content',questions.value);
+  })
+};
+const nextRound = () => {
+  totalRounds.value++;
+};
+const selectTopic = (topic: string) => {
+  triviaTopic.value = topic.substring(topic.indexOf(".") + 2, topic.indexOf(":"));
+  triviaInstructions.value = triviaTopic.value;
+  topics.value = [];
+  getTriviaQuestions();
+};
 onMounted(() => {
   getTriviaTopics();
 });
@@ -35,6 +60,7 @@ onMounted(() => {
   text-align: center;
   position: relative;
 }
+
 .trivia-topic {
   cursor: pointer;
   width: 500px;
@@ -45,8 +71,8 @@ onMounted(() => {
   border: 1px solid lightgrey;
   border-radius: 5px;
 }
+
 .trivia-topic:hover {
   border: 1px solid grey;
-
 }
 </style>

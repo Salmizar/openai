@@ -18,13 +18,13 @@ const options = [
     { model: "Trivia", name: "Trivia Game" },
 ];
 const router = useRouter();
-const LoadChatAction = (e: object) => {
+const LoadChatAction = (e: any) => {
     router.push({ name: e.currentTarget.value });
 }
 </script>
 <style>
 nav {
-    height: 30px;
+    height: 40px;
     padding: 10px 0 0 10px;
     background-color: gray;
     color: white;

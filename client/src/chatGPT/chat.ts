@@ -1,6 +1,7 @@
 import axios from "axios";
+import { IChatMSG } from "../interfaces/interfaces";
 
-function promptGPT(message: object):Promise<number> {
+function promptGPT(message: object):Promise<IChatMSG> {
     return new Promise((resolve, reject) => {
         axios.post(process.env.VUE_APP_API_URL + "/chat/",
             { message: JSON.stringify(message) },
@@ -17,7 +18,7 @@ function promptGPT(message: object):Promise<number> {
     })
 }
 
-function docPromptGPT(message: object):Promise<number> {
+function docPromptGPT(message: object):Promise<IChatMSG> {
     return new Promise((resolve, reject) => {
         axios.post(process.env.VUE_APP_API_URL + "/filechat/",
             { message: JSON.stringify(message) },
