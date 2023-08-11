@@ -19,7 +19,7 @@ import Message from '@/components/MessageView.vue'; // @ is an alias to /src
 import { onMounted, ref } from "vue";
 import { promptGPT } from '@/chatGPT/chat';
 import * as chatHistory from '@/chatGPT/chatHistory';
-import { IChatMSG, IChatMessages } from '@/interfaces/interfaces'
+import type { IChatMSG, IChatMessages } from '../interfaces/interfaces'
 const prompt = ref<string>('');
 const disabled = ref<boolean>(false);
 const firstLoad = ref<boolean>(true);

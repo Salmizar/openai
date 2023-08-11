@@ -11,12 +11,13 @@
 <script lang="ts" setup>
 import SvgIcon from '@jamescoyle/vue-icon';
 import { mdiRobot, mdiContentCopy, mdiFileDocumentOutline } from '@mdi/js';
-import { defineProps, defineEmits, onMounted, ref, onUpdated } from 'vue';
+import { onMounted, ref, onUpdated } from 'vue';
+import { IChatMSG } from '../interfaces/interfaces';
 const emits = defineEmits([
     'scrollToBottom'
 ]);
 const props = defineProps<{
-    message: object,
+    message: IChatMSG,
     index: number,
     isLast: boolean,
     firstLoad: boolean

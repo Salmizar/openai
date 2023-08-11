@@ -1,6 +1,7 @@
+import { IChatMessages } from "../interfaces/interfaces";
 
 let storageName = "openai-chat";
-function get():JSON {
+function get():IChatMessages {
     return JSON.parse(window.localStorage.getItem(storageName) || '[]');
 }
 function set(content: object) {

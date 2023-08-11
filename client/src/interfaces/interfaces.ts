@@ -3,10 +3,17 @@ export interface IChatMSG {
     content:string,
     document: string | null
 }
-export interface IChatMessages extends Array<IChatMSG> { }
+export type IChatMessages = Array<IChatMSG>
 
-export interface IFiles {
+export interface IFile {
     name:string,
     fileName:string
 }
-export interface IFileList extends Array<IFiles> { }
+export type IFileList = Array<IFile>
+
+export interface IAnswer {
+    text:string,
+    index:number,
+    correctAnswer:boolean
+}
+export type IAnswers = Array<IAnswer>

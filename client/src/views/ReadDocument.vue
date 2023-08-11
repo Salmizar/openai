@@ -32,7 +32,7 @@ import Message from '@/components/MessageView.vue'; // @ is an alias to /src
 import { docPromptGPT } from '@/chatGPT/chat';
 import * as chatHistory from '@/chatGPT/chatHistory';
 import * as savedFiles from '@/chatGPT/savedFiles';
-import { IChatMSG, IChatMessages, IFiles, IFileList  } from '@/interfaces/interfaces'
+import { IChatMSG, IChatMessages, IFile, IFileList  } from '../interfaces/interfaces';
 const deleteIconPath = mdiClose;
 const prompt = ref<string>('');
 const fileToAdd = ref();
@@ -93,7 +93,7 @@ const getSavedFiles = () => {
   selectedFile.value = -1;
   fileList.value = [];
   savedFiles.getFileList().then((data: []) => {
-    data.map((file: IFiles) => {
+    data.map((file: IFile) => {
       fileList.value.push(file);
     })
   })
@@ -108,11 +108,14 @@ const deleteFile = (fileName: string) => {
 };
 const addFile = (e: Event) => {
   const input = e.target as HTMLInputElement;
-  const file = input.files![0] as File;
-  savedFiles.uploadFile(file).then(() => {
-    fileToAdd.value = '';
-    getSavedFiles();
-  });
+    const files = input.files as FileList;
+  if (files.length>0) {
+    const file = files[0] as File;
+    savedFiles.uploadFile(file).then(() => {
+      fileToAdd.value = '';
+      getSavedFiles();
+    });
+  }
 };
 const selectFile = (index: number) => {
   selectedFile.value = index;

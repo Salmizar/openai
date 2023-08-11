@@ -25,7 +25,6 @@ function getTriviaQuestions(topic:string, numberOfQuestions=10): Promise<IChatMS
             
             "${topic}"`
         };
-        console.log('prompt for questions',message);
         promptGPT(message).then((data: IChatMSG) => {
             resolve(data);
         }).catch((error: object) => {
