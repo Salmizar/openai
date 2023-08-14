@@ -14,7 +14,6 @@ const options = [
     { model: "", name: "Select One" },
     { model: "Chat", name: "Chat" },
     { model: "ReadDocument", name: "Read Document" },
-    { model: "WriteCode", name: "Write Code" },
     { model: "Trivia", name: "Trivia Game" },
 ];
 const router = useRouter();

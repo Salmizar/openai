@@ -4,7 +4,6 @@ I'm experimenting with the possibilities of Chat-GPT.
 * Chat with Chat-GPT; Done.
 * Ask Chat-GPT questions about the contents of a document; Done.
 * Trivia Game; Done.
-* Code Writer; In Progress.
 
 # Built with
 
